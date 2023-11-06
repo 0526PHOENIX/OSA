@@ -28,7 +28,7 @@ SLICE = 7
 STRIDE = 5
 CLASS = 3
 BATCH = 32
-EPOCH = 4
+EPOCH = 2
 
 METRICS = 4
 METRICS_LOSS = 0
@@ -36,9 +36,9 @@ METRICS_ACC = 1
 METRICS_DICE = 2
 METRICS_IOU = 3
 
-DATA_PATH = "C:\\Users\\PHOENIX\\Desktop\\OSA_Project\\TempData"
+DATA_PATH = "C:\\Users\\PHOENIX\\Desktop\\OSA\\TempData"
 MODEL_PATH = ""
-RESULTS_PATH = "C:\\Users\\PHOENIX\\Desktop\\OSA_Project\\Segmentation\\Results"
+RESULTS_PATH = "C:\\Users\\PHOENIX\\Desktop\\OSA\\Segmentation\\Results"
 
 
 """
@@ -61,7 +61,7 @@ class Training():
         print('\n' + 'Training on: ' + str(self.device) + '\n')
 
         # time and tensorboard writer
-        self.time = datetime.datetime.now().strftime('%Y-%m-%d_%H.%M')
+        self.time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
         print('\n' + 'Start From: ' + self.time + '\n')
         self.train_writer = None
         self.val_writer = None
@@ -183,7 +183,7 @@ class Training():
 
             self.init_tensorboard()
         
-        return 0.0
+            return 0.0
 
     """
     ================================================================================================
