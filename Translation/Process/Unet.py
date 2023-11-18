@@ -207,4 +207,4 @@ if __name__ == '__main__':
     print('\n' + 'Training on device: ' + str(device) + '\n')
     
     model = Unet().to(device = device)
-    print(summary(model, input_size = (1, 512, 512), batch_size = 2))
+    print(summary(model, input_size = (1, 128, 128), batch_size = 2))
