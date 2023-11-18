@@ -190,8 +190,8 @@ class Evaluate():
         predicts_g = self.model(images_g)
 
         # compute loss value and matrics
-        loss, dice = self.get_loss(labels_g, predicts_g)
-        acc, iou = self.get_metrics(labels_g, predicts_g)
+        loss, dice = self.get_loss(predicts_g, labels_g)
+        acc, iou = self.get_metrics(predicts_g, labels_g)
 
         # save loss value and matrics to buffer
         metrics[METRICS_LOSS, batch_index] = loss
@@ -204,12 +204,12 @@ class Evaluate():
     Get Loss: Dice Loss + Dice
     ================================================================================================
     """
-    def get_loss(self, labels, predicts):
+    def get_loss(self, predicts, labels):
 
         with torch.no_grad():
 
             # dice
-            dice = get_dice(labels, predicts)
+            dice = get_dice(predicts, labels)
             # dice loss
             loss = 1 - dice
 
@@ -220,14 +220,14 @@ class Evaluate():
     Get Metrics: Accuracy + IOU
     ================================================================================================
     """
-    def get_metrics(self, labels, predicts):
+    def get_metrics(self, predicts, labels):
 
         with torch.no_grad():
             
             # accuracy
-            acc = get_acc(labels, predicts)
+            acc = get_acc(predicts, labels)
             # intersection of union
-            iou = get_iou(labels, predicts)
+            iou = get_iou(predicts, labels)
 
         return (acc, iou)
 

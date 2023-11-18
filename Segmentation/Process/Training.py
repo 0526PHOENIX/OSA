@@ -317,8 +317,8 @@ class Training():
         predicts_g = self.model(images_g)
 
         # compute loss value and matrics
-        loss, dice = self.get_loss(labels_g, predicts_g)
-        acc, iou = self.get_matrics(labels_g, predicts_g)
+        loss, dice = self.get_loss(predicts_g, labels_g)
+        acc, iou = self.get_matrics(predicts_g, labels_g)
 
         # save loss value and matrics to buffer
         metrics[METRICS_LOSS, batch_index] = loss
@@ -333,10 +333,10 @@ class Training():
     Get Loss: Dice Loss + Dice
     ================================================================================================
     """
-    def get_loss(self, labels, predicts):
+    def get_loss(self, predicts, labels):
 
         # dice
-        dice = get_dice(labels, predicts)
+        dice = get_dice(predicts, labels)
         # dice loss
         loss = 1 - dice
 
@@ -347,14 +347,14 @@ class Training():
     Get Metrics: Accuracy + IOU
     ================================================================================================
     """   
-    def get_matrics(self, labels, predicts):
+    def get_matrics(self, predicts, labels):
         
         with torch.no_grad():
             
             # accuracy
-            acc = get_acc(labels, predicts)
+            acc = get_acc(predicts, labels)
             # intersection of union
-            iou = get_iou(labels, predicts)
+            iou = get_iou(predicts, labels)
 
         return (acc, iou)
     

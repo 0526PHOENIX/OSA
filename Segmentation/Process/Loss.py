@@ -15,9 +15,9 @@ from torchmetrics.classification import MulticlassJaccardIndex
 Dice
 ====================================================================================================
 """
-def get_dice(labels, predicts):
+def get_dice(predicts, labels):
 
-    dice = Dice(num_classes = 3, average = 'micro')(labels, predicts)
+    dice = Dice(num_classes = 3, average = 'micro')(predicts, labels)
 
     return dice
 
@@ -27,9 +27,9 @@ def get_dice(labels, predicts):
 IoU
 ====================================================================================================
 """
-def get_iou(labels, predicts):
+def get_iou(predicts, labels):
 
-    iou = MulticlassJaccardIndex(num_classes = 3,average = 'micro')(labels, predicts)
+    iou = MulticlassJaccardIndex(num_classes = 3,average = 'micro')(predicts, labels)
 
     return iou
 
@@ -38,7 +38,7 @@ def get_iou(labels, predicts):
 Accuracy
 ====================================================================================================
 """
-def get_acc(labels, predicts):
+def get_acc(predicts, labels):
 
     correct = torch.sum((labels == predicts), dim = (1, 2))
     total = torch.sum((labels == labels), dim = (1, 2))
@@ -58,19 +58,19 @@ if __name__ == '__main__':
     torch.manual_seed(1)
     target = torch.rand((3, 7, 224, 224)).to(torch.int8)
 
-    dice = get_dice(target, inputs)
+    dice = get_dice(inputs, target)
     loss = 1- dice
     print()
     print(type(dice), dice)
     print(type(loss), loss)
     print()
 
-    iou = get_iou(target, inputs)
+    iou = get_iou(inputs, target)
     print()
     print(type(iou), iou)
     print()
 
-    acc = get_acc(target, inputs)
+    acc = get_acc(inputs, target)
     print()
     print(type(acc), acc)
     print()
