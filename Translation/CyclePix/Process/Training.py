@@ -538,7 +538,6 @@ class Training():
         metrics_dict[mode + '/psnr'] = metrics_a[METRICS_PSNR]
         metrics_dict[mode + '/ssim'] = metrics_a[METRICS_SSIM]
 
-
         # save metrics to tensorboard writer
         writer = getattr(self, mode + '_writer')
         for key, value in metrics_dict.items():
