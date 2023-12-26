@@ -312,7 +312,7 @@ Main Function
 """
 if __name__ == '__main__':
 
-    filepath = "C:\\Users\\PHOENIX\\Desktop\\OSA_Project\\TempData"
+    filepath = "C:\\Users\\PHOENIX\\Desktop\\OSA\\TempData"
 
     train_3D = Training_3D(filepath, False, 10)
     print()

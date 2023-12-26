@@ -67,9 +67,8 @@ class Training():
         self.val_writer = None
 
         # model and optimizer
-        self.model = self.init_model()
-        self.optimizer = self.init_optimizer()
-
+        self.init_model()
+        self.init_optimizer()
 
         # begin epoch
         self.begin = 1
@@ -83,9 +82,7 @@ class Training():
 
         print('\n' + 'Initializing Model' + '\n')
 
-        model = Unet(num_channel = SLICE, num_class = CLASS).to(self.device)
-
-        return model
+        self.model = Unet(num_channel = SLICE, num_class = CLASS).to(self.device)
     
     """
     ================================================================================================
@@ -96,9 +93,7 @@ class Training():
 
         print('\n' + 'Initializing Optimizer' + '\n')
 
-        adam = Adam(self.model.parameters(), lr = 1e-4)
-
-        return adam
+        self.optimizer = Adam(self.model.parameters(), lr = 1e-4)
 
     """
     ================================================================================================
@@ -263,7 +258,7 @@ class Training():
             loss = self.get_result(batch_index, batch_tuple, metrics).requires_grad_()
             loss.backward()
 
-            # updating the parameters
+            # updating parameters
             self.optimizer.step()
 
             progress.set_description('Epoch [' + space.format(epoch_index, ' / ', EPOCH) + ']')

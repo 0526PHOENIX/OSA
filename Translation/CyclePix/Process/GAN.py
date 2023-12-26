@@ -131,31 +131,6 @@ class Discriminator(nn.Module):
 
 """
 ====================================================================================================
-Test CycleGAN
-====================================================================================================
-"""
-def test_cycle(image):
-
-    gen1 = Generator()
-    dis1 = Discriminator()
-
-    gen2 = Generator()        
-    dis2 = Discriminator()        
-
-    fake1 = gen1(image)
-    result1 = dis1(image, fake1) 
-
-    fake2 = gen2(fake1)
-    result2 = dis2(fake1, fake2)
-
-    print(fake1.shape)
-    print(fake2.shape)
-    print(result1.shape)
-    print(result2.shape)
-
-
-"""
-====================================================================================================
 Main Function
 ====================================================================================================
 """
@@ -165,10 +140,7 @@ if __name__ == '__main__':
     print('\n' + 'Training on device: ' + str(device) + '\n')
     
     # model = Generator().to(device = device)
-    # print(summary(model, input_size = (1, 512, 512), batch_size = 2))
+    # print(summary(model, input_size = (1, 192, 192), batch_size = 2))
 
-    # model = Discriminator().to(device = device)
-    # print(summary(model, input_size = [(1, 512, 512), (1, 512, 512)], batch_size = 2))
-
-    # image = torch.randn(2, 1, 512, 512)
-    # test_cycle(image)
+    model = Discriminator().to(device = device)
+    print(summary(model, input_size = [(1, 192, 192), (1, 192, 192)], batch_size = 2))
