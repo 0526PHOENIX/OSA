@@ -314,13 +314,13 @@ if __name__ == '__main__':
 
     filepath = "C:\\Users\\PHOENIX\\Desktop\\OSA\\TempData"
 
-    train_3D = Training_3D(filepath, False, 10)
-    print()
-    print(len(train_3D))
-    image, label = train_3D[0]
-    print(type(image), image.device, image.shape, image.max(), image.min())
-    print(type(label), label.device, label.shape, label.unique())
-    print()
+    # train_3D = Training_3D(filepath, False, 10)
+    # print()
+    # print(len(train_3D))
+    # image, label = train_3D[0]
+    # print(type(image), image.device, image.shape, image.max(), image.min())
+    # print(type(label), label.device, label.shape, label.unique())
+    # print()
 
     train_2D = Training_2D(filepath, False, 10, 7)
     print()
@@ -330,19 +330,19 @@ if __name__ == '__main__':
     print(type(label), label.device, label.shape, label.unique())
     print()
 
-    test_3D = Training_3D(filepath, False, 10)
-    print()
-    print(len(test_3D))
-    image, label = test_3D[0]
-    print(type(image), image.device, image.shape, image.max(), image.min())
-    print(type(label), label.device, label.shape, label.unique())
-    print()
+    # test_3D = Training_3D(filepath, False, 10)
+    # print()
+    # print(len(test_3D))
+    # image, label = test_3D[0]
+    # print(type(image), image.device, image.shape, image.max(), image.min())
+    # print(type(label), label.device, label.shape, label.unique())
+    # print()
 
-    test_2D = Training_2D(filepath, False, 10, 7)
-    print()
-    print(len(test_2D))
-    image, label = test_2D[50]
-    print(type(image), image.device, image.shape, image.max(), image.min())
-    print(type(label), label.device, label.shape, label.unique())
-    print()
+    # test_2D = Training_2D(filepath, False, 10, 7)
+    # print()
+    # print(len(test_2D))
+    # image, label = test_2D[50]
+    # print(type(image), image.device, image.shape, image.max(), image.min())
+    # print(type(label), label.device, label.shape, label.unique())
+    # print()
 

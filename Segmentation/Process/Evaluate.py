@@ -156,80 +156,44 @@ class Evaluate():
     """
     def testing(self, test_dl):
 
-        # validation state
-        self.model.eval()
+        with torch.no_grad():
 
-        # create buffer for matrics
-        metrics = torch.zeros(METRICS, len(test_dl), device = self.device)
-    
-        progress = tqdm(enumerate(test_dl), total = len(test_dl), leave = True,
-                        bar_format = '{l_bar}{bar:15}{r_bar}{bar:-10b}')
-        for batch_index, batch_tuple in progress:
+            # validation state
+            self.model.eval()
 
-            # get metrics
-            self.get_result(batch_index, batch_tuple, metrics)
-            progress.set_description('Evaluating')
-            progress.set_postfix(test_loss = metrics[METRICS_LOSS, batch_index],
-                                    test_acc = metrics[METRICS_ACC, batch_index])
+            # create buffer for matrics
+            metrics = torch.zeros(METRICS, len(test_dl), device = self.device)
+        
+            progress = tqdm(enumerate(test_dl), total = len(test_dl), leave = True,
+                            bar_format = '{l_bar}{bar:15}{r_bar}{bar:-10b}')
+            for batch_index, batch_tuple in progress:
+
+                # get samples
+                (images_t, labels_t) = batch_tuple
+                images_g = images_t.to(self.device)
+                labels_g = labels_t.to(self.device)
+
+                # get output of model
+                predicts_g = self.model(images_g)
+
+                # get loss and metrics
+                dice = get_dice(predicts_g, labels_g)
+                loss = torch.ones(1, requires_grad = True, device = self.device) - dice 
+
+                # get ACC and IoU
+                acc = get_acc(predicts_g, labels_g)
+                iou = get_iou(predicts_g, labels_g)
+
+                # save loss value and matrics to buffer
+                metrics[METRICS_LOSS, batch_index] = loss
+                metrics[METRICS_ACC, batch_index] = acc
+                metrics[METRICS_DICE, batch_index] = dice
+                metrics[METRICS_IOU, batch_index] = iou
+
+                progress.set_description('Evaluating')
+                progress.set_postfix(test_loss = loss.item(), test_acc = acc.item())
 
         return metrics.to('cpu')
-
-    """
-    ================================================================================================
-    Get Result: Dice Loss + Accuracy + Dice + IOU
-    ================================================================================================
-    """
-    def get_result(self, batch_index, batch_tuple, metrics):
-
-        # get samples
-        (images_t, labels_t) = batch_tuple
-        images_g = images_t.to(self.device)
-        labels_g = labels_t.to(self.device)
-
-        # get output of model
-        predicts_g = self.model(images_g)
-
-        # compute loss value and matrics
-        loss, dice = self.get_loss(predicts_g, labels_g)
-        acc, iou = self.get_metrics(predicts_g, labels_g)
-
-        # save loss value and matrics to buffer
-        metrics[METRICS_LOSS, batch_index] = loss
-        metrics[METRICS_ACC, batch_index] = acc
-        metrics[METRICS_DICE, batch_index] = dice
-        metrics[METRICS_IOU, batch_index] = iou
-
-    """
-    ================================================================================================
-    Get Loss: Dice Loss + Dice
-    ================================================================================================
-    """
-    def get_loss(self, predicts, labels):
-
-        with torch.no_grad():
-
-            # dice
-            dice = get_dice(predicts, labels)
-            # dice loss
-            loss = 1 - dice
-
-        return (loss, dice)
-    
-    """
-    ================================================================================================
-    Get Metrics: Accuracy + IOU
-    ================================================================================================
-    """
-    def get_metrics(self, predicts, labels):
-
-        with torch.no_grad():
-            
-            # accuracy
-            acc = get_acc(predicts, labels)
-            # intersection of union
-            iou = get_iou(predicts, labels)
-
-        return (acc, iou)
 
     """
     ================================================================================================

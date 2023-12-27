@@ -75,20 +75,29 @@ Main Function
 """
 if __name__ == '__main__':
 
-    image = torch.rand((2, 1, 512, 512))
-    label = torch.rand((2, 1, 512, 512))
+    image = torch.rand((16, 1, 512, 512))
+    label = torch.rand((16, 1, 512, 512))
 
     print()
-    print(get_adv_loss(image, label))
+    adv = get_adv_loss(image, label)
+    print(adv, adv.size())
 
     print()
-    print(get_cyc_loss(image, label))
+    cyc = get_cyc_loss(image, label)
+    print(cyc, cyc.size())
 
     print()
-    print(get_pix_loss(image, label))
+    pix = get_pix_loss(image, label)
+    print(pix, pix.size())
 
     print()
-    print(get_psnr(image, label))
+    total = adv + cyc + pix
+    print(total, total.size())
 
     print()
-    print(get_ssim(image, label))
+    psnr = get_psnr(image, label)
+    print(psnr, psnr.size())
+
+    print()
+    ssim = get_ssim(image, label)
+    print(ssim, ssim.size())

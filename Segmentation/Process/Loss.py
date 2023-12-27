@@ -29,7 +29,7 @@ IoU
 """
 def get_iou(predicts, labels):
 
-    iou = MulticlassJaccardIndex(num_classes = 3,average = 'micro')(predicts, labels)
+    iou = MulticlassJaccardIndex(num_classes = 3, average = 'micro')(predicts, labels)
 
     return iou
 
@@ -59,18 +59,9 @@ if __name__ == '__main__':
     target = torch.rand((3, 7, 224, 224)).to(torch.int8)
 
     dice = get_dice(inputs, target)
+    print(dice.size(0))
     loss = 1- dice
     print()
     print(type(dice), dice)
     print(type(loss), loss)
-    print()
-
-    iou = get_iou(inputs, target)
-    print()
-    print(type(iou), iou)
-    print()
-
-    acc = get_acc(inputs, target)
-    print()
-    print(type(acc), acc)
     print()

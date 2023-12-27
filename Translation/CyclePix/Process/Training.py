@@ -53,14 +53,13 @@ class Training():
     """
     ================================================================================================
     Initialize Critical Parameters
-    # done
     ================================================================================================
     """
     def __init__(self):
         
         # training device
         self.use_cuda = torch.cuda.is_available()
-        self.device = torch.device("cuda" if self.use_cuda else "cpu")
+        self.device = torch.device('cuda' if self.use_cuda else 'cpu')
         print('\n' + 'Training on: ' + str(self.device) + '\n')
 
         # time and tensorboard writer
@@ -79,7 +78,6 @@ class Training():
     """
     ================================================================================================
     Initialize Model
-    # done
     ================================================================================================
     """
     def init_model(self):
@@ -95,7 +93,6 @@ class Training():
     """
     ================================================================================================
     Initialize Optimizer
-    # done
     ================================================================================================
     """
     def init_optimizer(self):
@@ -110,7 +107,6 @@ class Training():
     """
     ================================================================================================
     Initialize TensorBorad
-    # done
     ================================================================================================
     """
     def init_tensorboard(self):
@@ -129,7 +125,6 @@ class Training():
     """
     ================================================================================================
     Initialize Training Data Loader
-    # done
     ================================================================================================
     """
     def init_training_dl(self):
@@ -142,7 +137,6 @@ class Training():
     """
     ================================================================================================
     Initialize Validation Data Loader
-    # done
     ================================================================================================
     """
     def init_validation_dl(self):
@@ -155,7 +149,6 @@ class Training():
     """
     ================================================================================================
     Load Model Parameter and Hyperparameter
-    # done
     ================================================================================================
     """
     def load_model(self):
@@ -206,7 +199,6 @@ class Training():
     """
     ================================================================================================
     Main Training Function
-    # done
     ================================================================================================
     """
     def main(self):
@@ -287,6 +279,16 @@ class Training():
             real1_g = real1_t.to(self.device)
             real2_g = real2_t.to(self.device)
 
+            # save max & min
+            self.max1 = real1_g.max()
+            self.min1 = real1_g.min()
+            self.max2 = real2_g.max()
+            self.min2 = real2_g.min()
+
+            # normalization
+            real1_g = (real1_g - self.min1) / (self.max1 - self.min1 + 1e-6)
+            real2_g = (real2_g - self.min2) / (self.max2 - self.min2 + 1e-6)
+
             # get output of model
             fake1_g = self.gen21(real2_g)
             fake2_g = self.gen12(real2_g)
@@ -356,7 +358,7 @@ class Training():
             ========================================================================================
             """
             # refresh gradient
-            self.optimizer_dis1.zero_grad()
+            self.optimizer_dis2.zero_grad()
 
             # real loss
             loss_real2 = get_adv_loss(self.dis2(real2_g, real1_g), valid)
@@ -395,14 +397,13 @@ class Training():
             metrics[METRICS_SSIM, batch_index] = ssim
 
             progress.set_description('Epoch [' + space.format(epoch_index, ' / ', EPOCH) + ']')
-            progress.set_postfix(loss_gen = loss_gen, loss_dis1 = loss_dis1, loss_dis2 = loss_dis2)
+            progress.set_postfix(loss_gen = loss_gen.item(), loss_dis1 = loss_dis1.item(), loss_dis2 = loss_dis2.item())
 
         return metrics.to('cpu')
 
     """
     ================================================================================================
     Validation Loop
-    # done
     ================================================================================================
     """
     def validation(self, epoch_index, val_dl):
@@ -427,6 +428,16 @@ class Training():
                 (real1_t, real2_t) = batch_tuple
                 real1_g = real1_t.to(self.device)
                 real2_g = real2_t.to(self.device)
+
+                # save max & min
+                self.max1 = real1_g.max()
+                self.min1 = real1_g.min()
+                self.max2 = real2_g.max()
+                self.min2 = real2_g.min()
+
+                # normalization
+                real1_g = (real1_g - self.min1) / (self.max1 - self.min1)
+                real2_g = (real2_g - self.min2) / (self.max2 - self.min2)
 
                 # get output of model
                 fake1_g = self.gen21(real2_g)
@@ -515,14 +526,13 @@ class Training():
                 metrics[METRICS_SSIM, batch_index] = ssim
 
                 progress.set_description('Epoch [' + space.format(epoch_index, ' / ', EPOCH) + ']')
-                progress.set_postfix(loss_gen = loss_gen, loss_dis1 = loss_dis1, loss_dis2 = loss_dis2)
+                progress.set_postfix(loss_gen = loss_gen.item(), loss_dis1 = loss_dis1.item(), loss_dis2 = loss_dis2.item())
 
             return metrics.to('cpu')
     
     """
     ================================================================================================
     Save Metrics for Whole Epoch
-    # done
     ================================================================================================
     """ 
     def save_metrics(self, epoch_index, mode, metrics_t):
@@ -552,7 +562,6 @@ class Training():
     """
     ================================================================================================
     Save Some Image to Checking
-    # done
     ================================================================================================
     """ 
     def save_images(self, epoch_index, mode, dataloader):
@@ -588,7 +597,6 @@ class Training():
     """
     ================================================================================================
     Save Model
-    # done
     ================================================================================================
     """ 
     def save_model(self, epoch_index, score, is_best):

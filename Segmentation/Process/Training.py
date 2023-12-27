@@ -28,7 +28,7 @@ SLICE = 7
 STRIDE = 5
 CLASS = 3
 BATCH = 32
-EPOCH = 2
+EPOCH = 3
 
 METRICS = 4
 METRICS_LOSS = 0
@@ -150,10 +150,12 @@ class Training():
             checkpoint = torch.load(MODEL_PATH)
             print('\n' + 'Loading Checkpoint' + '\n')
 
-            # load model and optimizer
+            # load model
             self.model.load_state_dict(checkpoint['model_state'])
-            self.optimizer.load_state_dict(checkpoint['optimizer_state'])
             print('\n' + 'Loading Model: ' + checkpoint['model_name'] + '\n')
+
+            # load optimizer
+            self.optimizer.load_state_dict(checkpoint['optimizer_state'])
             print('\n' + 'Loading Optimizer: ' + checkpoint['optimizer_name'] + '\n')
 
             # set time
@@ -172,7 +174,7 @@ class Training():
             self.train_writer = SummaryWriter(log_dir = (log_dir + '_train'))
             self.val_writer = SummaryWriter(log_dir = (log_dir + '_val'))
 
-            return checkpoint['dice']
+            return checkpoint['score']
         
         else:
 
@@ -251,19 +253,37 @@ class Training():
                         bar_format = '{l_bar}{bar:15}{r_bar}{bar:-10b}')
         for batch_index, batch_tuple in progress:
 
+            # get samples
+            (images_t, labels_t) = batch_tuple
+            images_g = images_t.to(self.device)
+            labels_g = labels_t.to(self.device)
+
+            # get output of model
+            predicts_g = self.model(images_g)
+
             # refresh gradient
             self.optimizer.zero_grad()
 
             # get loss and metrics
-            loss = self.get_result(batch_index, batch_tuple, metrics).requires_grad_()
-            loss.backward()
+            dice = get_dice(predicts_g, labels_g)
+            loss = torch.ones(1, requires_grad = True, device = self.device) - dice
 
-            # updating parameters
+            # update parameters
+            loss.backward()
             self.optimizer.step()
 
+            # get ACC and IoU
+            acc = get_acc(predicts_g, labels_g)
+            iou = get_iou(predicts_g, labels_g)
+
+            # save loss value and matrics to buffer
+            metrics[METRICS_LOSS, batch_index] = loss
+            metrics[METRICS_ACC, batch_index] = acc
+            metrics[METRICS_DICE, batch_index] = dice
+            metrics[METRICS_IOU, batch_index] = iou
+
             progress.set_description('Epoch [' + space.format(epoch_index, ' / ', EPOCH) + ']')
-            progress.set_postfix(loss = metrics[METRICS_LOSS, batch_index],
-                                 acc = metrics[METRICS_ACC, batch_index])
+            progress.set_postfix(loss = loss.item(), acc = acc.item())
 
         return metrics.to('cpu')
 
@@ -287,71 +307,32 @@ class Training():
                             bar_format = '{l_bar}{bar:15}{r_bar}{bar:-10b}')
             for batch_index, batch_tuple in progress:
 
+                # get samples
+                (images_t, labels_t) = batch_tuple
+                images_g = images_t.to(self.device)
+                labels_g = labels_t.to(self.device)
+
+                # get output of model
+                predicts_g = self.model(images_g)
+
                 # get loss and metrics
-                self.get_result(batch_index, batch_tuple, metrics)
+                dice = get_dice(predicts_g, labels_g)
+                loss = torch.ones(1, requires_grad = True, device = self.device) - dice
+
+                # get ACC and IoU
+                acc = get_acc(predicts_g, labels_g)
+                iou = get_iou(predicts_g, labels_g)
+
+                # save loss value and matrics to buffer
+                metrics[METRICS_LOSS, batch_index] = loss
+                metrics[METRICS_ACC, batch_index] = acc
+                metrics[METRICS_DICE, batch_index] = dice
+                metrics[METRICS_IOU, batch_index] = iou
 
                 progress.set_description('Epoch [' + space.format(epoch_index, '/', EPOCH) + ']')
-                progress.set_postfix(val_loss = metrics[METRICS_LOSS, batch_index],
-                                     val_acc = metrics[METRICS_ACC, batch_index])
+                progress.set_postfix(val_loss = loss.item(), val_acc = acc.item())
 
         return metrics.to('cpu')
-
-    """
-    ================================================================================================
-    Get Result: Dice Loss + Accuracy + Dice + IOU
-    ================================================================================================
-    """
-    def get_result(self, batch_index, batch_tuple, metrics):
-
-        # get samples
-        (images_t, labels_t) = batch_tuple
-        images_g = images_t.to(self.device)
-        labels_g = labels_t.to(self.device)
-
-        # get output of model
-        predicts_g = self.model(images_g)
-
-        # compute loss value and matrics
-        loss, dice = self.get_loss(predicts_g, labels_g)
-        acc, iou = self.get_matrics(predicts_g, labels_g)
-
-        # save loss value and matrics to buffer
-        metrics[METRICS_LOSS, batch_index] = loss
-        metrics[METRICS_ACC, batch_index] = acc
-        metrics[METRICS_DICE, batch_index] = dice
-        metrics[METRICS_IOU, batch_index] = iou
-            
-        return loss
-    
-    """
-    ================================================================================================
-    Get Loss: Dice Loss + Dice
-    ================================================================================================
-    """
-    def get_loss(self, predicts, labels):
-
-        # dice
-        dice = get_dice(predicts, labels)
-        # dice loss
-        loss = 1 - dice
-
-        return (loss, dice)
-
-    """
-    ================================================================================================
-    Get Metrics: Accuracy + IOU
-    ================================================================================================
-    """   
-    def get_matrics(self, predicts, labels):
-        
-        with torch.no_grad():
-            
-            # accuracy
-            acc = get_acc(predicts, labels)
-            # intersection of union
-            iou = get_iou(predicts, labels)
-
-        return (acc, iou)
     
     """
     ================================================================================================
@@ -458,7 +439,7 @@ class Training():
             'optimizer_state': opt.state_dict(),
             'optimizer_name': type(opt).__name__,
             'epoch': epoch_index,
-            'dice': score,
+            'score': score,
         }
 
         # save model
